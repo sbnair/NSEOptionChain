@@ -8,6 +8,8 @@ requests = "*"
 pandas = "*"
 numpy = "==1.19.3"
 beautifulsoup4 = "*"
+matplotlib = "*"
+jinja2 = "*"
 
 [dev-packages]
 pylint = "*"
