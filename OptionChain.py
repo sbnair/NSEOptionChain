@@ -155,12 +155,12 @@ class NSE:
 
                 ce_df = pd.DataFrame(ce_data)
                 ce_df = ce_df.drop(['expiryDate', 'underlying', 'identifier', 'bidQty', 'bidprice', 'askQty', 'askPrice', 'changeinOpenInterest', 'change', 'underlyingValue'], axis = 1) 
-                ce_df = ce_df[['totalBuyQuantity', 'totalSellQuantity', 'totalTradedVolume', 'openInterest', 'pchangeinOpenInterest', 'lastPrice', 'pChange', 'impliedVolatility', 'strikePrice']]
+                ce_df = ce_df[['totalBuyQuantity', 'totalSellQuantity', 'totalTradedVolume', 'pchangeinOpenInterest', 'openInterest', 'pChange', 'lastPrice', 'impliedVolatility', 'strikePrice']]
                 ce_df = ce_df.rename(columns={'totalBuyQuantity':'BuyQ', 'totalSellQuantity':'SellQ', 'totalTradedVolume':'TotalVol', 'pchangeinOpenInterest':'pOI', 'openInterest':'OI', 'lastPrice':'LTP', 'pChange':'pLTP', 'impliedVolatility':'IV'})
 
                 pe_df = pd.DataFrame(pe_data)
                 pe_df= pe_df.drop(['expiryDate', 'underlying', 'identifier', 'bidQty', 'bidprice', 'askQty', 'askPrice', 'underlyingValue', 'changeinOpenInterest', 'change'], axis = 1)
-                pe_df = pe_df[['strikePrice', 'impliedVolatility', 'pChange', 'lastPrice', 'pchangeinOpenInterest', 'openInterest', 'totalTradedVolume', 'totalBuyQuantity', 'totalSellQuantity']]            
+                pe_df = pe_df[['strikePrice', 'impliedVolatility', 'lastPrice', 'pChange', 'openInterest', 'pchangeinOpenInterest', 'totalTradedVolume', 'totalBuyQuantity', 'totalSellQuantity']]            
                 pe_df = pe_df.rename(columns={'totalBuyQuantity':'BuyQ', 'totalSellQuantity':'SellQ', 'totalTradedVolume':'TotalVol', 'pchangeinOpenInterest':'pOI', 'openInterest':'OI', 'lastPrice':'LTP', 'pChange':'pLTP', 'impliedVolatility':'IV'})
 
                 df = pd.merge(ce_df, pe_df, on='strikePrice', suffixes=('_c', '_p'), how='outer', sort=True).fillna(0)
@@ -212,7 +212,7 @@ class NSE:
                 color = 'red' if val < 0 else 'green'
                 return 'color: %s' % color
             
-            def highlight_min(data, color='#df66e8'):
+            def highlight_min(data, color='rgba(209, 19, 162, 0.7)'):
                 '''
                 highlight the minimum in a Series or DataFrame
                 '''
@@ -250,29 +250,31 @@ class NSE:
             vol_max = self.df[['TotalVol_c', 'TotalVol_p']].max().max()
 
             def linear_gradient_OI(row):
-                r = '#eb6e6e'
-                g = '#4fc95b'
+                r = 'rgba(255,20,20,0.5)'
+                g = 'rgba(41, 171, 54, 0.7)'
                 df1 = pd.DataFrame('', index=row.index, columns=row.columns)
                 df1['OI_c'] = 'background : linear-gradient(90deg,'+r+' '+round(row['OI_c']/oi_max*100,1).astype(str)+'%, transparent '+round(row['OI_c']/oi_max*100,1).astype(str)+'%)'
-                df1['OI_p'] = 'background : linear-gradient(90deg,'+g+' '+round(row['OI_p']/oi_max*100,1).astype(str)+'%, transparent '+round(row['OI_p']/oi_max*100,1).astype(str)+'%)'
+                # df1['OI_c'] = 'background : #f3c0c0; left:-5px; right:initial; border-top-right-radius : 20px; width : '+ round(row['OI_c']/oi_max*100,1).astype(str)+'%'
+                df1['OI_p'] = 'background : linear-gradient(270deg,'+g+' '+round(row['OI_p']/oi_max*100,1).astype(str)+'%, transparent '+round(row['OI_p']/oi_max*100,1).astype(str)+'%)'
                 return df1
 
             def linear_gradient_vol(row):
-                color = '#26abad'
+                r = 'rgba(255,20,20, 0.5)'
+                g = 'rgba(41, 171, 54, 0.7)'
                 df1 = pd.DataFrame('', index=row.index, columns=row.columns)
-                df1['TotalVol_c'] = 'background : linear-gradient(90deg,'+color+' '+round(row['TotalVol_c']/vol_max*100,1).astype(str)+'%, transparent '+round(row['TotalVol_c']/vol_max*100,1).astype(str)+'%)'
-                df1['TotalVol_p'] = 'background : linear-gradient(90deg,'+color+' '+round(row['TotalVol_p']/vol_max*100,1).astype(str)+'%, transparent '+round(row['TotalVol_p']/vol_max*100,1).astype(str)+'%)'
+                df1['TotalVol_c'] = 'background : linear-gradient(90deg,'+r+' '+round(row['TotalVol_c']/vol_max*100,1).astype(str)+'%, transparent '+round(row['TotalVol_c']/vol_max*100,1).astype(str)+'%)'
+                df1['TotalVol_p'] = 'background : linear-gradient(270deg,'+g+' '+round(row['TotalVol_p']/vol_max*100,1).astype(str)+'%, transparent '+round(row['TotalVol_p']/vol_max*100,1).astype(str)+'%)'
                 return df1
             
             df_style = self.df.style    
             
-            indicator = '>m ' + str(round((self.underlyingValue-self.maxpain)/self.maxpain*100, 1)) if self.underlyingValue>self.maxpain else '<m ' + str(round((self.maxpain-self.underlyingValue)/self.underlyingValue*100, 1))
+            indicator = '>maxpain ' + str(round((self.underlyingValue-self.maxpain)/self.maxpain*100, 1)) if self.underlyingValue>self.maxpain else '<maxpain ' + str(round((self.maxpain-self.underlyingValue)/self.underlyingValue*100, 1))
             superscript = '<sup>' + indicator +'</sup>'
 
             styles = [
                 # hover(),
-                dict(selector="th", props=[("font-size", "100%"), ("text-align", "center"), ('background-color', 'grey')]),
-                dict(selector="caption", props=[("caption-side", "top"), ("font-size", "120%"), ("font-family", "roboto"), ("text-align", "center")])
+                dict(selector="th", props=[("font-size", "100%"), ("text-align", "center"), ('background-color', 'rgba(4, 121, 204, 0.6)'), ("border-radius", "5px")]),
+                dict(selector="caption", props=[("caption-side", "top"), ("font-size", "95%"), ("font-family", "helvetica"), ("text-align", "center"), ('font-weight', '700')])
             ]
             temp = str(symbol) + "<br />Expiry - " + str(expiry) + "<br /><br />" + "UnderlyingValue - " + \
                 str(self.underlyingValue)+ superscript + "&nbsp;&nbsp;&nbsp;&nbsp;PCR_OI - " + str(self.pcr_oi) + \
@@ -283,7 +285,7 @@ class NSE:
             df_style = df_style.apply(linear_gradient_vol, axis=None)
             # df_style = df_style.bar(subset=['OI_c'], color='#eb6e6e')
             # df_style = df_style.bar(subset=['OI_p'], color='#4fc95b')         
-            df_style = df_style.bar(subset=['MaxPain'], color='#df66e8')
+            df_style = df_style.bar(subset=['MaxPain'], color='rgba(209, 19, 162, 0.4)')
             # df_style = df_style.bar(subset=['TotalVol_c', 'TotalVol_p'], color='#26abad')
             # df_style = df_style.bar(subset=['pOI_c', 'pOI_p'], align='mid', color=['#eb6e6e', '#4fc95b'])
             df_style = df_style.set_properties(**{'width':'80px', 'color':'black', 'font-family':'roboto', 'text-align':'center', 'font-weight':'400'})
@@ -298,16 +300,15 @@ class NSE:
             df_style = df_style.applymap(color_pcolumn, subset=pd.IndexSlice[:,['pOI_c', 'pOI_p', 'pLTP_c', 'pLTP_p']])
 
             def highlight_greater(x):
-                r = '#4fc95b'
-                g = '#4fc95b'
+                color = 'rgba(255,20,20, 0.5)'
 
                 m1 = x['SellQ_c'] > x['BuyQ_c']
                 m2 = x['SellQ_p'] > x['BuyQ_p']
 
                 df1 = pd.DataFrame('background-color: ', index=x.index, columns=x.columns)
                 #rewrite values by boolean masks
-                df1['SellQ_c'] = np.where(m1, 'background-color: {}'.format(r), df1['SellQ_c'])
-                df1['SellQ_p'] = np.where(m2, 'background-color: {}'.format(g), df1['SellQ_p'])
+                df1['SellQ_c'] = np.where(m1, 'background-color: {}'.format(color), df1['SellQ_c'])
+                df1['SellQ_p'] = np.where(m2, 'background-color: {}'.format(color), df1['SellQ_p'])
                 return df1
             
             df_style = df_style.apply(highlight_greater, axis=None)
@@ -317,6 +318,7 @@ class NSE:
             df_style = df_style.format({'pOI_c':'{:.1f}', 'pLTP_c':'{:.1f}',  \
                 'pOI_p':'{:.1f}', 'pLTP_p':'{:.1f}', 'LTP_c':'{:.2f}', 'LTP_p':'{:.2f}', \
                     'strikePrice':'{:.2f}', 'MaxPain':'{:.0f}'})   
+            df_style = df_style.applymap(lambda x: "border-radius:5px")
             html = df_style.render()  
             
             with open("index.html","w") as f:
