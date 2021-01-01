@@ -212,7 +212,7 @@ class NSE:
                 color = 'red' if val < 0 else 'green'
                 return 'color: %s' % color
             
-            def highlight_min(data, color='rgba(209, 19, 162, 0.7)'):
+            def highlight_min(data, color='rgba(58, 59, 53, 0.7)'):
                 '''
                 highlight the minimum in a Series or DataFrame
                 '''
@@ -273,7 +273,7 @@ class NSE:
 
             styles = [
                 # hover(),
-                dict(selector="th", props=[("font-size", "100%"), ("text-align", "center"), ('background-color', 'rgba(4, 121, 204, 0.6)'), ("border-radius", "5px")]),
+                dict(selector="th", props=[("font-size", "100%"), ("text-align", "center"), ('background-color', 'rgba(4, 121, 204, 0.6)'), ("border-radius", "10px")]),
                 dict(selector="caption", props=[("caption-side", "top"), ("font-size", "95%"), ("font-family", "helvetica"), ("text-align", "center"), ('font-weight', '700')])
             ]
             temp = str(symbol) + "<br />Expiry - " + str(expiry) + "<br /><br />" + "UnderlyingValue - " + \
@@ -285,10 +285,10 @@ class NSE:
             df_style = df_style.apply(linear_gradient_vol, axis=None)
             # df_style = df_style.bar(subset=['OI_c'], color='#eb6e6e')
             # df_style = df_style.bar(subset=['OI_p'], color='#4fc95b')         
-            df_style = df_style.bar(subset=['MaxPain'], color='rgba(209, 19, 162, 0.4)')
+            df_style = df_style.bar(subset=['MaxPain'], color='rgba(58, 59, 53, 0.5)')
             # df_style = df_style.bar(subset=['TotalVol_c', 'TotalVol_p'], color='#26abad')
             # df_style = df_style.bar(subset=['pOI_c', 'pOI_p'], align='mid', color=['#eb6e6e', '#4fc95b'])
-            df_style = df_style.set_properties(**{'width':'80px', 'color':'black', 'font-family':'roboto', 'text-align':'center', 'font-weight':'400'})
+            df_style = df_style.set_properties(**{'width':'80px', 'font-family':'roboto', 'text-align':'center', 'font-weight':'400'})
             df_style = df_style.set_properties(**{'background-color':'#f7f7f7'})
             # df_style = df_style.set_properties(**{'background-color':'#ddd5de'}, subset=['strikePrice'])
             df_style = df_style.applymap(lambda x: 'background-color:#f5f4cb' if x==self.df['strikePrice'][atm_index] else None, subset=['strikePrice'])
@@ -320,9 +320,31 @@ class NSE:
                     'strikePrice':'{:.2f}', 'MaxPain':'{:.0f}'})   
             df_style = df_style.applymap(lambda x: "border-radius:5px")
             html = df_style.render()  
-            
+
+            result = '''<html>
+            <head>
+            <style>
+
+            table tbody tr:hover {
+                color:rgb(32, 21, 235);
+                background-color: rgb(0, 0, 200, 1);
+                font-size: 102%;
+                border: 50px green;
+                font-weight:800;
+                
+            }
+            </style>
+            </head>
+            <body>
+            '''          
+            result += html
+            result += '''
+            </body>
+            </html>
+            '''
+
             with open("index.html","w") as f:
-                f.write(html)
+                f.write(result)
             return indicator
         else:
             with open("index.html","w") as f:
@@ -388,7 +410,7 @@ class NSE:
         
             table tbody tr:hover {
                 background-color: #82A2EF;
-                font-size: 120%;
+                font-size: 100%;
                 color: white;
             }
             .wide {
